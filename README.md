@@ -1,3 +1,11 @@
+UPD by utilmind:
+
+ * Fixed Uncaught TypeError: Cannot read property 'shift' of null, when data('counterup-nums') is null.
+ * Added support of "data-counter-offset" attribute. (Previously it was always 100%)
+ * Added "data-counter-to" attribute, to specify the endpoint of countup. This is more priority alternative to text().
+
+<hr />
+
 # jquery.countup.js
 
 jquery.countup.js is a jQuery plugin that *animates* a number from zero (counting up towards it). It supports counting up:
