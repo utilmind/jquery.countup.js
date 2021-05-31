@@ -62,8 +62,8 @@
             }
 
             // start
-            $this.data("counterup-nums", nums);
-            $this.text("0");
+            $this.data("counterup-nums", nums)
+                 .text("0");
 
             // Updates the number until we're done
             var f = function() {
