@@ -5,41 +5,43 @@
 * Released under the MIT License
 *
 * Date: Oct 27, 2016
+*
+* Forked by utilmind 31.05.2021: https://github.com/utilmind/jquery.countup.js
 */
-(function( $ ){
+(function($) {
   "use strict";
 
-  $.fn.countUp = function( options ) {
+  $.fn.countUp = function(options) {
 
     // Defaults
     var settings = $.extend({
-        'time': 2000,
-        'delay': 10
+        time: 2000,
+        delay: 10,
+        offset: "100%",
     }, options);
 
-    return this.each(function(){
+    return this.each(function() {
 
         // Store the object
-        var $this = $(this);
-        var $settings = settings;
+        var $this = $(this),
+            $settings = settings;
 
         var counterUpper = function() {
-            if(!$this.data('counterupTo')) {
-                $this.data('counterupTo',$this.text());
-            }
-            var time = parseInt($this.data("counter-time")) > 0 ? parseInt($this.data("counter-time")) : $settings.time;
-            var delay = parseInt($this.data("counter-delay")) > 0 ? parseInt($this.data("counter-delay")) : $settings.delay;
-            var divisions = time / delay;
-            var num = $this.data('counterupTo');
-            var nums = [num];
-            var isComma = /[0-9]+,[0-9]+/.test(num);
-            num = num.replace(/,/g, '');
-            var isInt = /^[0-9]+$/.test(num);
-            var isFloat = /^[0-9]+\.[0-9]+$/.test(num);
+            var num = ($this.data('counter-to') || $this.text()).toString(), // parsed as string
+                time = parseInt($this.data("counter-time")) || $settings.time,
+                delay = parseInt($this.data("counter-delay")) || $settings.delay,
+
+                divisions = time / delay,
+                nums = [num],
+                isComma = /[\d]+,[\d]+/.test(num);
+
+            num = num.replace(/,/g, "");
+            var isInt = /^[\d]+$/.test(num);
+            var isFloat = /^[\d]+\.[\d]+$/.test(num);
             var decimalPlaces = isFloat ? (num.split('.')[1] || []).length : 0;
 
             // Generate list of incremental numbers to display
-            for (var i = divisions; i >= 1; i--) {
+            for (var i = divisions; i >= 1; --i) {
 
                 // Preserve as int if input was int
                 var newNum = parseInt(Math.round(num / divisions * i));
@@ -59,18 +61,19 @@
                 nums.unshift(newNum);
             }
 
-            $this.data('counterup-nums', nums);
-            $this.text('0');
+            // start
+            $this.data("counterup-nums", nums);
+            $this.text("0");
 
             // Updates the number until we're done
             var f = function() {
-                $this.text($this.data('counterup-nums').shift());
-                if ($this.data('counterup-nums').length) {
-                    setTimeout($this.data('counterup-func'),delay);
-                } else {
-                    delete $this.data('counterup-nums');
-                    $this.data('counterup-nums', null);
-                    $this.data('counterup-func', null);
+                var nums = $this.data('counterup-nums');
+                if (nums.length) {
+                    $this.text(nums.shift());
+                    setTimeout($this.data('counterup-func'), delay);
+                }else {
+                    $this.data('counterup-nums', undefined)
+                         .data('counterup-func', undefined);
                 }
             };
             $this.data('counterup-func', f);
@@ -80,9 +83,12 @@
         };
 
         // Perform counts when the element gets into view
-        $this.waypoint(counterUpper, { offset: '100%', triggerOnce: true });
+        $this.waypoint(counterUpper, {
+            offset: $this.data("counter-offset") || $settings.offset,
+            triggerOnce: true
+        });
     });
 
   };
 
-})( jQuery );
+})(jQuery);
