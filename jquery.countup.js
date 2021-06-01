@@ -24,71 +24,75 @@
 
         // Store the object
         var $this = $(this),
-            $settings = settings;
 
-        var counterUpper = function() {
-            var num = ($this.data('counter-to') || $this.text()).toString(), // parsed as string
-                time = parseInt($this.data("counter-time")) || $settings.time,
-                delay = parseInt($this.data("counter-delay")) || $settings.delay,
+            counterUpper = function() {
+                var num = $this.data("counter-to");
+                if (!num)
+                    $this.data("counter-to", num = $this.text()); // text is dynamic. We can use only the first initial value. It will be useless when it start count up.
+                num = num.toString(); // parsed as string, since there can be multiple values
 
-                divisions = time / delay,
-                nums = [num],
-                isComma = /[\d]+,[\d]+/.test(num);
+                var time = parseInt($this.data("counter-time")) || settings.time,
+                    delay = parseInt($this.data("counter-delay")) || settings.delay,
 
-            num = num.replace(/,/g, "");
-            var isInt = /^[\d]+$/.test(num);
-            var isFloat = /^[\d]+\.[\d]+$/.test(num);
-            var decimalPlaces = isFloat ? (num.split('.')[1] || []).length : 0;
+                    divisions = time / delay,
+                    nums = [num],
+                    isComma = /[\d]+,[\d]+/.test(num);
 
-            // Generate list of incremental numbers to display
-            for (var i = divisions; i >= 1; --i) {
+                num = num.replace(/,/g, "");
 
-                // Preserve as int if input was int
-                var newNum = parseInt(Math.round(num / divisions * i));
+                var isInt = /^[\d]+$/.test(num),
+                    isFloat = /^[\d]+\.[\d]+$/.test(num),
+                    decimalPlaces = isFloat ? (num.split('.')[1] || []).length : 0;
 
-                // Preserve float if input was float
-                if (isFloat) {
-                    newNum = parseFloat(num / divisions * i).toFixed(decimalPlaces);
-                }
+                // Generate list of incremental numbers to display
+                for (var i = divisions; i >= 1; --i) {
 
-                // Preserve commas if input had commas
-                if (isComma) {
-                    while (/(\d+)(\d{3})/.test(newNum.toString())) {
-                        newNum = newNum.toString().replace(/(\d+)(\d{3})/, '$1'+','+'$2');
+                    // Preserve as int if input was int
+                    var newNum = parseInt(Math.round(num / divisions * i));
+
+                    // Preserve float if input was float
+                    if (isFloat) {
+                        newNum = parseFloat(num / divisions * i).toFixed(decimalPlaces);
                     }
+
+                    // Preserve commas if input had commas
+                    if (isComma) {
+                        while (/(\d+)(\d{3})/.test(newNum.toString())) {
+                            newNum = newNum.toString().replace(/(\d+)(\d{3})/, '$1'+','+'$2');
+                        }
+                    }
+
+                    nums.unshift(newNum);
                 }
 
-                nums.unshift(newNum);
-            }
+                // start
+                $this.data("counterup-nums", nums)
+                     .text("0");
 
-            // start
-            $this.data("counterup-nums", nums)
-                 .text("0");
+                // Updates the number until we're done
+                var f = function() {
+                    var nums = $this.data('counterup-nums');
+                    if (nums.length) {
+                        $this.text(nums.shift());
+                        setTimeout($this.data('counterup-func'), delay);
+                    }else {
+                        $this.data('counterup-nums', undefined)
+                             .data('counterup-func', undefined);
+                    }
+                };
+                $this.data('counterup-func', f);
 
-            // Updates the number until we're done
-            var f = function() {
-                var nums = $this.data('counterup-nums');
-                if (nums.length) {
-                    $this.text(nums.shift());
-                    setTimeout($this.data('counterup-func'), delay);
-                }else {
-                    $this.data('counterup-nums', undefined)
-                         .data('counterup-func', undefined);
-                }
+                // Start the count up
+                setTimeout($this.data('counterup-func'),delay);
             };
-            $this.data('counterup-func', f);
 
-            // Start the count up
-            setTimeout($this.data('counterup-func'),delay);
-        };
-
-        // Perform counts when the element gets into view
-        $this.waypoint(counterUpper, {
-            offset: $this.data("counter-offset") || $settings.offset,
-            triggerOnce: true
+            // Perform counts when the element gets into view
+            $this.waypoint(counterUpper, {
+                offset: $this.data("counter-offset") || settings.offset,
+                triggerOnce: true
+            });
         });
-    });
 
-  };
+    };
 
 })(jQuery);
